@@ -38,7 +38,7 @@ router.post('/', isLogin, validateCampground, catchAsync(async (req, res, next) 
 // show the detailed camp info
 router.get('/:id', catchAsync(async (req, res, next) => {
     const { id } = req.params;
-    const campground = await Campground.findById(id).populate("reviews");
+    const campground = await Campground.findById(id).populate("reviews").populate("author");
     if (!campground) {
         req.flash('error', 'Cannot find that campgound!')
         return res.redirect('/campgounds')
@@ -46,6 +46,7 @@ router.get('/:id', catchAsync(async (req, res, next) => {
     // console.log(campground);
     res.render('campgrounds/show', { campground }); // {campground, msg: req.flash('success')} replaced by a middleware
 }));
+
 // the edit page of a camp
 router.get('/:id/edit', isLogin, catchAsync(async (req, res, next) => {
     const { id } = req.params;
