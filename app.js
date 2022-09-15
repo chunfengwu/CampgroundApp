@@ -60,8 +60,8 @@ passport.deserializeUser(User.deserializeUser());
 //     next();
 // })
 app.use((req, res, next) => {
-    console.log(req.session);
-    console.log(req.user);
+    // conscole.log(req.session);
+    // console.log(req.user);
     res.locals.currentUser = req.user; // if user login, user info will be auto saved into req.user. If login, Nav bar will only show logout. If logout, req.user will be undifined;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
