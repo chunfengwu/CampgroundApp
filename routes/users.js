@@ -34,6 +34,7 @@ router.get('/login', async (req, res) => {
 
 router.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login', keepSessionInfo: true }), (req, res) => {
     req.flash('success', 'welcome back!');
+    // isLogin middleware was trigered when visit New campground page, will save the originalURL to returnTo.
     const redirectUrl = req.session.returnTo || '/campgrounds';
     delete req.session.returnTo;
     res.redirect(redirectUrl);
