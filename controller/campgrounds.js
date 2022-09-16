@@ -11,8 +11,10 @@ module.exports.renderNewForm = async (req, res, next) => {
 
 module.exports.createCampground = async (req, res, next) => {
     const campground = new Campground(req.body.campground)
+    campground.images = req.files.map(f => ({ url: f.path, filename: f.filename })) // multer save uploaded files as arry in req.files. Take each uploaed file's path and filename to Campground Schema
     campground.author = req.user._id; // when a user create a new camp, need to save the current login user to Camp schema
     await campground.save();
+    console.log(campground)
     req.flash('success', 'Successfully made a new campground');
     res.redirect(`/campgrounds/${campground._id}`)
 }
@@ -44,6 +46,9 @@ module.exports.renderEditForm = async (req, res, next) => {
 module.exports.updateCampground = async (req, res, next) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(id, req.body.campground);
+    const newImgs = req.files.map(f => ({ url: f.path, filename: f.filename }));
+    campground.images.push(...newImgs);
+    await campground.save();
     req.flash('success', 'Successfully updated campground!');
     // res.send(updatedCamp)
     res.redirect(`/campgrounds/${id}`)
