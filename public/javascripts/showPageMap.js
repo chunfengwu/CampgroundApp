@@ -9,7 +9,7 @@
 //     center: campground.geometry.coordinates,// starting position [lng, lat]
 //     zoom: 8, // starting zoom
 //     projection: 'globe' // display the map as a 3D globe
-// });
+// }
 
 // console.log(campground)
 
