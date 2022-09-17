@@ -1,22 +1,22 @@
-if (process.env.NODE_ENV != "production") {
+if (process.env.NODE_ENV!="production") {
     require('dotenv').config()
 }
 
-const express = require('express');
-const path = require('path');
-const mongoose = require('mongoose');
-const ejsMate = require('ejs-mate');
-const methodOverride = require('method-override')
-const session = require('express-session')
-const flash = require('connect-flash');
-const ExpressError = require('./utilies/Expresserror');
-const passport = require('passport');
-const LocalStrategry = require('passport-local');
-const User = require('./models/user');
+const express=require('express');
+const path=require('path');
+const mongoose=require('mongoose');
+const ejsMate=require('ejs-mate');
+const methodOverride=require('method-override')
+const session=require('express-session')
+const flash=require('connect-flash');
+const ExpressError=require('./utilies/Expresserror');
+const passport=require('passport');
+const LocalStrategry=require('passport-local');
+const User=require('./models/user');
 
-const userRoutes = require('./routes/users')
-const campgroundsRoutes = require('./routes/campgrounds');
-const reviewsRoutes = require('./routes/reviews');
+const userRoutes=require('./routes/users')
+const campgroundsRoutes=require('./routes/campgrounds');
+const reviewsRoutes=require('./routes/reviews');
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp')
     .then(() => {
@@ -27,7 +27,7 @@ mongoose.connect('mongodb://localhost:27017/yelp-camp')
         console.log(err)
     })
 
-const app = express();
+const app=express();
 
 app.engine('ejs', ejsMate);
 app.set('views', path.join(__dirname, 'views'));
@@ -38,14 +38,14 @@ app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-const sessionConfig = {
+const sessionConfig={
     secret: 'thisshouldbeabettersecret',
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
-        expire: Date.now() + 1000 * 60 * 60 * 24 * 7,
-        maxAge: 1000 * 60 * 60 * 24 * 7
+        expire: Date.now()+1000*60*60*24*7,
+        maxAge: 1000*60*60*24*7
     }
 };
 
@@ -66,9 +66,9 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => {
     // conscole.log(req.session);
     // console.log(req.user);
-    res.locals.currentUser = req.user; // if user login, user info will be auto saved into req.user. If login, Nav bar will only show logout. If logout, req.user will be undifined;
-    res.locals.success = req.flash('success');
-    res.locals.error = req.flash('error');
+    res.locals.currentUser=req.user; // if user login, user info will be auto saved into req.user. If login, Nav bar will only show logout. If logout, req.user will be undifined;
+    res.locals.success=req.flash('success');
+    res.locals.error=req.flash('error');
     next();
 }); // has to be positioned before calling the following routes
 
@@ -77,7 +77,7 @@ app.use('/campgrounds', campgroundsRoutes)
 app.use('/campgrounds/:id/reviews', reviewsRoutes)
 
 app.get('/', (req, res) => {
-    res.render('home')
+    res.render('campgrounds/home')
 });
 
 app.all('*', (req, res, next) => {
@@ -85,9 +85,9 @@ app.all('*', (req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-    const { statusCode = 500 } = err;
+    const { statusCode=500 }=err;
     if (!err.message) {
-        err.message = "something went wrong"
+        err.message="something went wrong"
     }
     res.status(statusCode).render('error', { err });
 })
