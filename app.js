@@ -47,7 +47,7 @@ app.use(
     }),
 );
 
-const secret=process.env.SECRET||'thisshouldbeabettersecret';
+const secret=process.env.SESSION_SECRET||'thisshouldbeabettersecret';
 // create a mongoDB store to save the session data
 const store=MongoStore.create({
     mongoUrl: dbUrl,
