@@ -22,7 +22,7 @@ const reviewsRoutes=require('./routes/reviews');
 
 const MongoStore=require('connect-mongo');
 // const dbUrl=process.env.DB_URL
-const dbUrl='mongodb://localhost:27017/yelp-camp'
+const dbUrl=process.env.DB_URL||'mongodb://localhost:27017/yelp-camp'
 mongoose.connect(dbUrl)
     .then(() => {
         console.log("MONGO CONNECTION OPEN!!!")
@@ -47,18 +47,11 @@ app.use(
     }),
 );
 
+const secret=process.env.SECRET||'thisshouldbeabettersecret';
 // create a mongoDB store to save the session data
-
-// store: MongoStore.create({
-//     mongoUrl: 'mongodb://user12345:foobar@localhost/test-app?authSource=admin&w=1',
-//     // mongoOptions: advancedOptions
-//     // clientPromise,
-//     dbName: 'test-app'
-// })
-
 const store=MongoStore.create({
     mongoUrl: dbUrl,
-    secret: 'thisshouldbeabettersecret',
+    secret,
     touchAfter: 24*60*60 // set a period of time to save
 })
 
@@ -69,7 +62,7 @@ store.on('error', function (e) {
 const sessionConfig={
     store,
     name: 'session',
-    secret: 'thisshouldbeabettersecret',
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
