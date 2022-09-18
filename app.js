@@ -13,12 +13,17 @@ const ExpressError=require('./utilies/Expresserror');
 const passport=require('passport');
 const LocalStrategry=require('passport-local');
 const User=require('./models/user');
+const mongoSanitize=require('express-mongo-sanitize');
+const helmet=require('helmet');
 
 const userRoutes=require('./routes/users')
 const campgroundsRoutes=require('./routes/campgrounds');
 const reviewsRoutes=require('./routes/reviews');
 
-mongoose.connect('mongodb://localhost:27017/yelp-camp')
+const MongoStore=require('connect-mongo');
+// const dbUrl=process.env.DB_URL
+const dbUrl='mongodb://localhost:27017/yelp-camp'
+mongoose.connect(dbUrl)
     .then(() => {
         console.log("MONGO CONNECTION OPEN!!!")
     })
@@ -36,14 +41,40 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true })); // parsing the req body
 app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+    mongoSanitize({
+        replaceWith: '_',
+    }),
+);
 
+// create a mongoDB store to save the session data
+
+// store: MongoStore.create({
+//     mongoUrl: 'mongodb://user12345:foobar@localhost/test-app?authSource=admin&w=1',
+//     // mongoOptions: advancedOptions
+//     // clientPromise,
+//     dbName: 'test-app'
+// })
+
+const store=MongoStore.create({
+    mongoUrl: dbUrl,
+    secret: 'thisshouldbeabettersecret',
+    touchAfter: 24*60*60 // set a period of time to save
+})
+
+store.on('error', function (e) {
+    console.log("Session Store erro", e)
+})
 
 const sessionConfig={
+    store,
+    name: 'session',
     secret: 'thisshouldbeabettersecret',
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
+        // secure: true, //for deploy
         expire: Date.now()+1000*60*60*24*7,
         maxAge: 1000*60*60*24*7
     }
@@ -51,6 +82,55 @@ const sessionConfig={
 
 app.use(session(sessionConfig));
 app.use(flash());
+
+
+const scriptSrcUrls=[
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://api.mapbox.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+
+];
+const styleSrcUrls=[
+    "https://kit-free.fontawesome.com/",
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.mapbox.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css",
+];
+const connectSrcUrls=[
+    "https://api.mapbox.com/",
+    "https://a.tiles.mapbox.com/",
+    "https://b.tiles.mapbox.com/",
+    "https://events.mapbox.com/",
+];
+const fontSrcUrls=[];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/dh9y1pv65/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+                "https://images.unsplash.com/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
+
+
 app.use(passport.initialize());
 app.use(passport.session()); // make sure passport.session is used after session
 //  refer to passport-local-mongoose doc: https://github.com/saintedlama/passport-local-mongoose

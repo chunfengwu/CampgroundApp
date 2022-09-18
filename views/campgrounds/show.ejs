@@ -83,7 +83,9 @@
             <button class="btn btn-success mb-3">Submit</button>
         </form>
         <% } %>
-        <!-- <h2>Reviews</h2> -->
+        <% if(campground.reviews.length) { %>
+        <h3>Reviews</h3>
+        <% } %>
         <% for(let review of campground.reviews) { %>
         <div class="card mb-3">
             <div class="card-body">
