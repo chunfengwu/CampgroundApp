@@ -47,7 +47,7 @@ app.use(
     }),
 );
 
-const secret=process.env.SECRET||'thisshouldbeabettersecret';
+const secret=process.env.SESSION_SECRET||'thisshouldbeabettersecret';
 // create a mongoDB store to save the session data
 const store=MongoStore.create({
     mongoUrl: dbUrl,
@@ -165,7 +165,7 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render('error', { err });
 })
 
-
-app.listen(3000, () => {
-    console.log("APP IS LISTENING ON PORT 3000!")
+const port=process.env.PORT||300;
+app.listen(port, () => {
+    console.log(`APP IS LISTENING ON PORT ${port}!`)
 })
